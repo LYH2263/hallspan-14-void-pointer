@@ -80,6 +80,27 @@ def find_violations(rows: int, cols: int, min_dist: int, assigns: list[SeatAssig
                                        f"同试卷套 {a.paper_id} 四邻相邻"))
     return viols
 
+def seat_lookup(assigns: list[SeatAssign]) -> dict[tuple[int, int], SeatAssign]:
+    return {(a.row, a.col): a for a in assigns}
+
+def find_assign(assigns: list[SeatAssign], candidate_id: int) -> SeatAssign | None:
+    for a in assigns:
+        if a.candidate_id == candidate_id:
+            return a
+    return None
+
+def swap_candidates(assigns: list[SeatAssign], id_a: int, id_b: int) -> tuple[SeatAssign, SeatAssign]:
+    """Swap the seats of two candidates in place. Voided plans never get here."""
+    if id_a == id_b:
+        raise ValueError("不能与自身对调")
+    a = find_assign(assigns, id_a)
+    b = find_assign(assigns, id_b)
+    if a is None or b is None:
+        raise LookupError("考生不在当前方案中")
+    a.row, b.row = b.row, a.row
+    a.col, b.col = b.col, a.col
+    return a, b
+
 def plan_to_dict(assigns: list[SeatAssign], unplaced: list[dict], viols: list[Violation], rows: int, cols: int) -> dict:
     return {
         "rows": rows,
