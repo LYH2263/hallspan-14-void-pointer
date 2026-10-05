@@ -26,9 +26,16 @@ class Candidate(Base):
     ticket_no: Mapped[str] = mapped_column(String(32))
     paper_id: Mapped[int] = mapped_column(ForeignKey("paper_sets.id"))
 
+PLAN_ACTIVE = "active"
+PLAN_VOID = "void"
+PLAN_STATUSES = (PLAN_ACTIVE, PLAN_VOID)
+
 class SeatPlan(Base):
     __tablename__ = "seat_plans"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     hall_id: Mapped[int] = mapped_column(ForeignKey("halls.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # active = 当前有效指针指向的方案；void = 已作废，永久留档，禁止再写入/调座
+    status: Mapped[str] = mapped_column(String(16), default=PLAN_ACTIVE, server_default=PLAN_ACTIVE, index=True)
+    voided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     result_json: Mapped[str] = mapped_column(Text, default="{}")
